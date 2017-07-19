@@ -54,6 +54,11 @@ class AccountService(val accountRepo: AccountRepository) {
     fun withdrawCash(from: String, amount: BigDecimal): Account {
         if (amount < BigDecimal.ZERO) throw IllegalArgumentException("Amount should be greater then zero.")
         val account = accountRepo.findOne(AccountId(from)) ?: throw NotFoundException(from)
+
+        val balance = account.balance()
+        val amountToWithdraw = Money(amount)
+        if (balance < amountToWithdraw) throw NotEnoughMoney(from, amountToWithdraw - balance)
+
         return accountRepo.save(account.withdrawCash(Money(amount)))
     }
 
