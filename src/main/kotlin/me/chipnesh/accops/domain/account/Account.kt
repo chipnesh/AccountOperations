@@ -19,7 +19,10 @@ data class Account(
          * События по счёту.
          */
         @OneToMany(cascade = arrayOf(CascadeType.ALL))
-        private val events: List<AccountEvent> = mutableListOf()
+        private val events: List<AccountEvent> = mutableListOf(),
+
+        @Version
+        private val version: Int = 0
 ) {
     /**
      * Добавляет событие.

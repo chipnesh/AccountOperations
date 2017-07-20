@@ -3,6 +3,7 @@ package me.chipnesh.accops.web
 import me.chipnesh.accops.domain.account.NotEnoughMoney
 import me.chipnesh.accops.domain.account.NotFoundException
 import org.springframework.http.HttpStatus
+import org.springframework.orm.ObjectOptimisticLockingFailureException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import javax.servlet.http.HttpServletResponse
@@ -22,5 +23,10 @@ class ExceptionMapperAdvice {
     @ExceptionHandler(NotFoundException::class)
     fun handleNotFound(res: HttpServletResponse, e: NotFoundException) {
         res.sendError(HttpStatus.NOT_FOUND.value(), e.message)
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException::class)
+    fun handleNotFound(res: HttpServletResponse, e: ObjectOptimisticLockingFailureException) {
+        res.sendError(HttpStatus.CONFLICT.value(), e.message)
     }
 }
