@@ -12,13 +12,13 @@ class AccountServiceTest {
 
     @Test
     fun shouldCreateNewAccount() {
-        val account = Account(AccountId("1")).depositCash(1.1.money())
+        val account = Account(AccountId("1")).depositCash(Money(BigDecimal(1.1)))
         val repository = mock<AccountRepository> {
-            on { save(any<Account>())} doReturn account
+            on { save(any<Account>())} doAnswer { it.arguments[0] as Account}
         }
         val service = AccountService(repository)
 
-        val result = service.createNew("1", 1.1.bigdec())
+        val result = service.createNew("1", BigDecimal(1.1))
         assertThat(account).isEqualTo(result)
     }
 
@@ -32,16 +32,16 @@ class AccountServiceTest {
     @Test
     fun shouldReturnCorrectBalance() {
         val account = Account(AccountId("1"))
-                .depositCash(25.money())
-                .withdrawCash(7.money())
-                .depositCash(2.money())
+                .depositCash(Money(BigDecimal(25)))
+                .withdrawCash(Money(BigDecimal(7)))
+                .depositCash(Money(BigDecimal(2)))
         val repository = mock<AccountRepository> {
             on { findOne(AccountId("1")) } doReturn account
         }
         val service = AccountService(repository)
 
         val balance = service.balance("1")
-        assertThat(balance).isEqualTo(20.money())
+        assertThat(balance).isEqualTo(Money(BigDecimal(20)))
     }
 
     @Test
@@ -53,29 +53,41 @@ class AccountServiceTest {
         }
         val service = AccountService(repository)
 
-        val modified = service.depositCash("1", 10.bigdec())
+        val modified = service.depositCash("1", BigDecimal(10))
         val balance = modified.balance()
-        assertThat(balance).isEqualTo(10.money())
+        assertThat(balance).isEqualTo(Money(BigDecimal(10)))
     }
 
     @Test
     fun shouldWithdrawCash() {
-        val account = Account(AccountId("1")).depositCash(11.money())
+        val account = Account(AccountId("1")).depositCash(Money(BigDecimal(11)))
         val repository = mock<AccountRepository> {
             on { findOne(AccountId("1")) } doReturn account
             on { save(any<Account>())} doAnswer { it.arguments[0] as Account }
         }
         val service = AccountService(repository)
 
-        val modified = service.withdrawCash("1", 10.bigdec())
+        val modified = service.withdrawCash("1", BigDecimal(10))
         val balance = modified.balance()
-        assertThat(balance).isEqualTo(1.money())
+        assertThat(balance).isEqualTo(Money(BigDecimal(1)))
+    }
+
+    @Test(expected = NotEnoughMoney::class)
+    fun shouldTrowNotEnoughMoney() {
+        val account = Account(AccountId("1")).depositCash(Money(BigDecimal(1)))
+        val repository = mock<AccountRepository> {
+            on { findOne(AccountId("1")) } doReturn account
+            on { save(any<Account>())} doAnswer { it.arguments[0] as Account }
+        }
+        val service = AccountService(repository)
+
+        service.withdrawCash("1", BigDecimal(10))
     }
 
     @Test
     fun shouldTransferMoney() {
-        var accountFirst = Account(AccountId("1")).depositCash(10.money())
-        var accountSecond = Account(AccountId("2")).depositCash(10.money())
+        var accountFirst = Account(AccountId("1")).depositCash(Money(BigDecimal(10)))
+        var accountSecond = Account(AccountId("2")).depositCash(Money(BigDecimal(10)))
 
         val repository = mock<AccountRepository> {
             on { findOne(any<AccountId>()) } doAnswer {
@@ -97,9 +109,9 @@ class AccountServiceTest {
         }
 
         val service = AccountService(repository)
-        service.transfer("1", "2", 5.bigdec())
+        service.transfer("1", "2", BigDecimal(5))
 
-        assertThat(accountFirst.balance()).isEqualTo(5.money())
-        assertThat(accountSecond.balance()).isEqualTo(15.money())
+        assertThat(accountFirst.balance()).isEqualTo(Money(BigDecimal(5)))
+        assertThat(accountSecond.balance()).isEqualTo(Money(BigDecimal(15)))
     }
 }

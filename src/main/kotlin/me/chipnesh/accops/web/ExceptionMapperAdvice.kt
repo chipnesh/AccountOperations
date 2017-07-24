@@ -26,7 +26,7 @@ class ExceptionMapperAdvice {
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException::class)
-    fun handleNotFound(res: HttpServletResponse, e: ObjectOptimisticLockingFailureException) {
+    fun handleAccountAlreadyModified(res: HttpServletResponse, e: ObjectOptimisticLockingFailureException) {
         res.sendError(HttpStatus.CONFLICT.value(), e.message)
     }
 }

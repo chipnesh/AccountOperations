@@ -3,6 +3,7 @@ package me.chipnesh.accops.domain.account
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.util.*
 
 /**
  * Служба управления счетами.
@@ -13,10 +14,16 @@ class AccountService(val accountRepo: AccountRepository) {
      * Создаёт новый счет.
      */
     @Transactional
-    fun createNew(id: String, amount: BigDecimal): Account {
+    fun createNew(id: String = UUID.randomUUID().toString(),
+                  amount: BigDecimal = BigDecimal.ZERO): Account {
         if (amount < BigDecimal.ZERO) throw IllegalArgumentException("Amount should be greater then zero.")
-        val account = Account(AccountId(id)).depositCash(Money(amount))
-        return accountRepo.save(account)
+        val newAccount = Account(AccountId(id))
+
+        val accountToSave = if (amount > BigDecimal.ZERO)
+            newAccount.depositCash(Money(amount))
+        else newAccount
+
+        return accountRepo.save(accountToSave)
     }
 
     /**
@@ -24,13 +31,13 @@ class AccountService(val accountRepo: AccountRepository) {
      */
     @Transactional
     fun transfer(from: String, to: String, amount: BigDecimal) {
+        if (amount < BigDecimal.ZERO) throw IllegalArgumentException("Amount should be greater then zero.")
+
         val fromAccount = accountRepo.findOne(AccountId(from)) ?: throw NotFoundException(from)
         val toAccount = accountRepo.findOne(AccountId(to)) ?: throw NotFoundException(to)
 
         val balance = fromAccount.balance()
         val amountToTransfer = Money(amount)
-
-        if (amount < BigDecimal.ZERO) throw IllegalArgumentException("Amount should be greater then zero.")
         if (balance < amountToTransfer) throw NotEnoughMoney(from, amountToTransfer - balance)
 
         accountRepo.save(fromAccount.withdrawTo(toAccount, amountToTransfer))
@@ -59,7 +66,7 @@ class AccountService(val accountRepo: AccountRepository) {
         val amountToWithdraw = Money(amount)
         if (balance < amountToWithdraw) throw NotEnoughMoney(from, amountToWithdraw - balance)
 
-        return accountRepo.save(account.withdrawCash(Money(amount)))
+        return accountRepo.save(account.withdrawCash(amountToWithdraw))
     }
 
     /**

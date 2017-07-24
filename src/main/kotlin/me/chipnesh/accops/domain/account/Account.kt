@@ -1,6 +1,5 @@
 package me.chipnesh.accops.domain.account
 
-import kotlinx.collections.immutable.toImmutableList
 import java.time.ZonedDateTime
 import javax.persistence.*
 
@@ -21,13 +20,16 @@ data class Account(
         @OneToMany(cascade = arrayOf(CascadeType.ALL))
         private val events: List<AccountEvent> = mutableListOf(),
 
+        /**
+         * Версия счёта (для оптимистичной блокировки hibernate).
+         */
         @Version
         private val version: Int = 0
 ) {
     /**
      * Добавляет событие.
      */
-    private fun addEvent(event: AccountEvent) = Account(id, events.toImmutableList().add(event))
+    private fun addEvent(event: AccountEvent) = Account(id, events + event)
 
     /**
      * Добавляет наличные.
@@ -54,9 +56,13 @@ data class Account(
      */
     fun balance() = events.fold(Money()) { sum, event -> sum + event.money }
 
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other !is Account) return false
-        if (other.id == id) return true
-        return false
+        if (other.id != id) return false
+        return true
     }
 }

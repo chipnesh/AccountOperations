@@ -1,21 +1,21 @@
 # AccountOperations
-Simple client accounts management application.
+Simple bank account management application.
 
-Project is written in kotlin. 
-It exposes simple REST API for bank account management. 
-The spring boot is used.
+ The application has written in kotlin and exposes simple 
+ REST API for the bank account management. The spring boot is used. 
+ The spring boot is used.
 
 ## Build instructions
-Just execute `gradle build` command
+Just execute the `gradle build` command
 
 ## Public API
 
-When application is started then 3 accounts will be created. Test accounts ids are: `1, 2, 3`
+When application is started then 3 test accounts will be created. Accounts ids are: `1, 2, 3`
 
  `GET /balance/{id}` - Will return account balance.
  
  `POST /transfer/{from}/{to}/{amount}` - Will transfer specified amount of money from `{from}` to `{to}` account id.
  
- `POST /deposit/{to}/{amount}` - Will deposit money to account.
+ `POST /deposit/{to}/{amount}` - Will deposit cash to account.
  
- `POST /withdraw/{from}/{amount}` - Will withdraw money from account.
+ `POST /withdraw/{from}/{amount}` - Will withdraw cash from account.

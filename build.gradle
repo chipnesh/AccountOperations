@@ -20,11 +20,6 @@ jar {
     version = '0.1.0'
 }
 
-sourceSets {
-    main.kotlin.srcDirs += 'src/main/myKotlin'
-    main.java.srcDirs += 'src/main/myJava'
-}
-
 repositories {
     jcenter()
     maven {
@@ -35,7 +30,6 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8"
-    compile 'org.jetbrains.kotlinx:kotlinx-collections-immutable:0.1'
     compile 'org.hsqldb:hsqldb:2.3.1'
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
